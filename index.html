@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星聯尚鵬 鈑烤內部對帳快速計算機 (DMS代碼自動歸總版)</title>
+    <title>尚鵬內湖場專用 鈑烤內部對帳快速計算機 </title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -11,6 +11,8 @@
             --warn-color: #c0392b;
             --bg-color: #ecf0f1;
             --panel-bg: #ffffff;
+            --memo-bg: #f8fafc;
+            --memo-border: #cbd5e1;
         }
 
         body {
@@ -41,10 +43,6 @@
 
         header h1 { margin: 0; color: var(--primary-color); font-size: 24px; }
 
-        .api-key-zone input {
-            padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; width: 250px;
-        }
-
         .factory-select-zone {
             background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px;
             border-left: 5px solid var(--primary-color); font-weight: bold;
@@ -54,33 +52,75 @@
 
         .main-workspace {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.1fr 0.9fr;
             gap: 30px;
         }
 
+        /* 左側：總監流程備忘錄面板 */
         .left-panel {
-            border: 2px dashed #bdc3c7; border-radius: 8px; background: #fafafa;
-            position: relative; min-height: 480px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
+            background: var(--memo-bg);
+            border: 1px solid var(--memo-border);
+            border-radius: 8px;
+            padding: 25px;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        #paste-placeholder { text-align: center; color: #7f8c8d; font-size: 16px; }
-
-        .file-upload-btn {
-            background-color: #34495e; color: white; padding: 10px 20px;
-            font-size: 14px; border-radius: 4px; cursor: pointer; display: inline-block; margin-top: 15px; font-weight: bold;
+        .memo-title {
+            font-size: 18px;
+            color: var(--primary-color);
+            font-weight: bold;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            text-align: center;
         }
-        #file-input { display: none; }
-        #pasted-img { max-width: 100%; max-height: 520px; display: none; }
 
-        .loading-overlay {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9); flex-direction: column; align-items: center; justify-content: center; z-index: 10;
+        .memo-section {
+            margin-bottom: 20px;
         }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 右側：自動歸總表格與微調區 */
+        .memo-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 15px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .memo-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #475569;
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .formula-highlight {
+            background: #fffbeb;
+            border-left: 3px solid #d97706;
+            padding: 8px;
+            margin-top: 8px;
+            font-weight: bold;
+            color: #b45309;
+        }
+
+        .review-tip {
+            background: #fff5f5;
+            border: 1px dashed var(--warn-color);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            color: var(--warn-color);
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 25px;
+        }
+
+        /* 右側：金額手動輸入與微調區 */
         .right-panel { display: flex; flex-direction: column; gap: 15px; }
 
         .dms-box {
@@ -92,7 +132,7 @@
         .dms-code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: monospace; }
 
         .input-row {
-            display: grid; grid-template-columns: 200px 1fr; align-items: center; gap: 10px;
+            display: grid; grid-template-columns: 180px 1fr; align-items: center; gap: 10px;
         }
         .input-row label { font-weight: 600; color: #475569; font-size: 14px; }
         .input-row input {
@@ -121,11 +161,7 @@
 
 <div class="container">
     <header>
-        <h1>星聯尚鵬 鈑烤內部對帳快速計算機 (DMS代碼自動歸總版)</h1>
-        <div class="api-key-zone">
-            <label for="api-key-input" style="font-size:12px; font-weight:bold; color:#7f8c8d;">Gemini API Key ➔</label>
-            <input type="password" id="api-key-input" placeholder="貼上 AI Studio 申請的 Key">
-        </div>
+        <h1>尚鵬內湖場 鈑烤內部對帳快速計算機 (備忘錄版)</h1>
     </header>
 
     <div class="factory-select-zone">
@@ -139,49 +175,68 @@
     </div>
 
     <div class="main-workspace">
-        <div class="left-panel" id="drop-zone">
-            <div class="loading-overlay" id="loading-view">
-                <div class="spinner"></div>
-                <p style="margin-top:15px; font-weight:bold; color:#2c3e50;">AI 正在通讀整張單據，並自動按 DMS 代碼歸總金額...</p>
-            </div>
+        
+        <div class="left-panel">
+            <div class="memo-title">📋 總監流程 ── 承修廠內部金額核銷與工資代碼控制台</div>
             
-            <div id="paste-placeholder">
-                <p style="font-size: 32px; margin: 0 0 10px 0;">🧠 AI 明細自動歸總</p>
-                <strong>拖曳</strong>明細圖片進來，或點擊下方按鈕選擇檔案<br>
-                <label for="file-input" class="file-upload-btn">選擇單據圖片</label>
-                <input type="file" id="file-input" accept="image/*"><br><br>
-                <span style="font-size:12px; color:#95a5a6;">(提示：若明細手寫模糊，可在前面手寫【鈑金】或【烤漆】引導 AI 精準加總)</span>
+            <div class="memo-section">
+                <h3>💡 一、 保險金額核銷與雙軌拆帳計算邏輯</h3>
+                <div class="memo-content">
+                    本廠（承修廠）向委修廠請款時，金額一律依項目性質，嚴格執行以下雙軌計算：
+                    <div class="formula-highlight">
+                        1. 【純工資項目】結算邏輯 ──【68% 含稅】<br>
+                        凡是保險公司核准的純板金、純烤漆技術工資（如系統代碼 9996、9997）。<br>
+                        💥 公式：(純工資項目總額) × 68% = 承修廠實拿技術工資（含稅）
+                    </div>
+                    <div class="formula-highlight" style="border-left-color: #059669; background: #ecfdf5; color: #065f46;">
+                        2. 【堪用零件折抵工資】結算邏輯 ──【80% 請款】<br>
+                        凡是保險公司已核准全新零件預算，但現場評估舊件「堪用」，改由我廠用鈑噴技術修復（以修代換）者。<br>
+                        💥 公式：(堪用零件核准總額) × 80% = 承修廠實拿轉化工資（含稅）
+                    </div>
+                </div>
             </div>
-            <img id="pasted-img" alt="Invoice">
+
+            <div class="memo-section">
+                <h3>⚙️ 二、 車間施工與系統工資代碼</h3>
+                <div class="memo-content" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div><strong>🛠️ 代碼 9996 ─ 板金與拆裝修復</strong> (拆裝、拉皮、更換校正，純工資 68%)</div>
+                    <div><strong>🎨 代碼 9997 ─ 烤漆與特殊漆料</strong> (局部烤、面數塗裝，純工資 68%)</div>
+                    <div><strong>⚡ 代碼 9998 ─ 引電與電腦診斷</strong> (電機、查線、故障排除，實拿 100%)</div>
+                </div>
+            </div>
+
+            <div class="review-tip">
+                ⚠️ 【覆核提示】：月底結帳請款。
+            </div>
         </div>
 
         <div class="right-panel">
-            <div style="background:#edf2f7; padding:10px; border-radius:6px; font-size:13px; color:#2d3748; font-weight:bold;">
-                💡 圖片置入後，AI 會自動將多筆明細加總，填入下方對應的項目中。
+            <div style="background:#edf2f7; padding:12px; border-radius:6px; font-size:14px; color:#2d3748; font-weight:bold; text-align: center;">
+                ⌨️ 請手動輸入保險核定之原始總額，系統將自動依總監公式拆帳
             </div>
             
             <div class="dms-box">
-                <div class="dms-title"><span>鈑金合計工資總額</span><span class="dms-code">項目代碼: 9996</span></div>
-                <div class="input-row"><label for="amt-ban">原始總額累計 ($)：</label><input type="number" id="amt-ban" placeholder="AI 自動加總中..."></div>
+                <div class="dms-title"><span>🛠️ 鈑金合計工資總額</span><span class="dms-code">項目代碼: 9996 (68%)</span></div>
+                <div class="input-row"><label for="amt-ban">原始總額累計 ($)：</label><input type="number" id="amt-ban" placeholder="請輸入鈑金總額"></div>
             </div>
 
             <div class="dms-box">
-                <div class="dms-title"><span>烤漆合計工資總額</span><span class="dms-code">項目代碼: 9997</span></div>
-                <div class="input-row"><label for="amt-kao">原始總額累計 ($)：</label><input type="number" id="amt-kao" placeholder="AI 自動加總中..."></div>
+                <div class="dms-title"><span>🎨 烤漆合計工資總額</span><span class="dms-code">項目代碼: 9997 (68%)</span></div>
+                <div class="input-row"><label for="amt-kao">原始總額累計 ($)：</label><input type="number" id="amt-kao" placeholder="請輸入烤漆總額"></div>
             </div>
 
             <div class="dms-box">
-                <div class="dms-title"><span>引電合計工資總額</span><span class="dms-code">項目代碼: 9998</span></div>
-                <div class="input-row"><label for="amt-yin">原始總額累計 ($)：</label><input type="number" id="amt-yin" placeholder="AI 自動加總中..."></div>
+                <div class="dms-title"><span>⚡ 引電合計工資總額</span><span class="dms-code">項目代碼: 9998 (100%)</span></div>
+                <div class="input-row"><label for="amt-yin">原始總額累計 ($)：</label><input type="number" id="amt-yin" placeholder="無則免填或填0"></div>
             </div>
 
             <div class="dms-box">
-                <div class="dms-title"><span>堪用零件折抵工資</span><span class="dms-code">比例: 80%</span></div>
-                <div class="input-row"><label for="amt-parts">原始總額累計 ($)：</label><input type="number" id="amt-parts" placeholder="AI 自動加總中..."></div>
+                <div class="dms-title"><span>🔄 堪用零件折抵工資</span><span class="dms-code">核銷比例: 80%</span></div>
+                <div class="input-row"><label for="amt-parts">原始總額累計 ($)：</label><input type="number" id="amt-parts" placeholder="無則免填或填0"></div>
             </div>
 
             <div class="penalty-zone">
-                <div class="input-row"><label style="color:var(--warn-color);">保險總砍價金額 ($)：</label><input type="number" id="amt-cut" value="0"></div>
+                <div class="input-row"><label style="color:var(--warn-color);">📉 保險總砍價金額 ($)：</label><input type="number" id="amt-cut" value="0"></div>
                 <div style="display:flex; align-items:center; gap:8px; margin-top:5px;">
                     <input type="checkbox" id="chk-delay" style="width:18px; height:18px;">
                     <label for="chk-delay" style="color:var(--warn-color); font-weight:bold; font-size:14px;">🚨 觸發交期延誤客訴 (扣除此案委修工資之 15%)</label>
@@ -218,73 +273,9 @@
     }
     
     document.getElementById('factory-select').addEventListener('change', updateVirtualTicket);
-    window.addEventListener('DOMContentLoaded', () => {
-        updateVirtualTicket();
-        if(localStorage.getItem('gemini_key')) {
-            document.getElementById('api-key-input').value = localStorage.getItem('gemini_key');
-        }
-    });
+    window.addEventListener('DOMContentLoaded', updateVirtualTicket);
 
-    document.getElementById('api-key-input').addEventListener('change', function(e) {
-        localStorage.setItem('gemini_key', e.target.value);
-    });
-
-    function handleImageFile(file) {
-        if (!file || file.type.indexOf('image') === -1) return;
-        const apiKey = document.getElementById('api-key-input').value.trim();
-        if(!apiKey) { alert('請先在網頁右上角填入您的 Gemini API Key！'); return; }
-
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const img = document.getElementById('pasted-img');
-            img.src = event.target.result; img.style.display = 'block';
-            document.getElementById('paste-placeholder').style.display = 'none';
-            callGeminiSummarizeAPI(event.target.result.split(',')[1], file.type);
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // 指揮 AI 進行「多筆明細自動歸總加總」的核心邏輯與 Prompt
-    async function callGeminiSummarizeAPI(base64Image, mimeType) {
-        const apiKey = document.getElementById('api-key-input').value.trim();
-        const loadingView = document.getElementById('loading-view');
-        loadingView.style.display = 'flex';
-
-        const promptText = "這是一張汽車維修明細單。請通讀整張單據，抓出所有的施工工資。你的核心任務是【合併同類項並自動加總】。請依據以下邏輯，把整張單據算成最終的四個總數：\n1. 凡是屬於鈑金、校正、拆裝、拉皮、鈑金更換等項目，特別是前方若有標記【鈑金】或含有鈑金涵義的項目，請將它們的金額【全部加總】，放在 'ban_total'。\n2. 凡是屬於烤漆、噴漆、局部烤、面數塗裝等項目，特別是前方若有標記【烤漆】或含有烤漆涵義的項目，請將它們的金額【全部加總】，放在 'kao_total'。\n3. 凡是屬於引電、電機、查線、診斷等項目，特別是前方有標記【引電】的項目，請將它們的金額【全部加總】，放在 'yin_total'。\n4. 凡是註明堪用零件折抵、零件回收折抵或標記【折抵】的金額，請將它們【全部加總】，放在 'parts_total'。\n5. 若單據上有寫保險批價減收或被砍掉的總價差，放在 'cut_total'。若無則為0。\n請嚴格只回傳一個標準的 JSON 物件，不要包含 markdown 標籤或額外中文說明。格式必須如下：\n{\n  \"ban_total\": 0,\n  \"kao_total\": 0,\n  \"yin_total\": 0,\n  \"parts_total\": 0,\n  \"cut_total\": 0\n}";
-
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        const payload = { contents: [{ parts: [{ text: promptText }, { inlineData: { mimeType: mimeType, data: base64Image } }] }] };
-
-        try {
-            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await response.json();
-            let responseText = data.candidates[0].content.parts[0].text;
-            responseText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            
-            const result = JSON.parse(responseText);
-
-            // 直接填入 AI 幫忙自動歸總完的四大總金額
-            document.getElementById('amt-ban').value = result.ban_total || 0;
-            document.getElementById('amt-kao').value = result.kao_total || 0;
-            document.getElementById('amt-yin').value = result.yin_total || 0;
-            document.getElementById('amt-parts').value = result.parts_total || 0;
-            document.getElementById('amt-cut').value = result.cut_total || 0;
-
-        } catch (error) {
-            console.error(error);
-            alert('AI 歸總辨識發生錯誤，請檢查 Key 是否正確，或直接手動輸入總額。');
-        } finally {
-            loadingView.style.display = 'none';
-        }
-    }
-
-    // 拖曳與選擇按鈕監聽
-    document.getElementById('file-input').addEventListener('change', function(e) { handleImageFile(e.target.files[0]); });
-    const dropZone = document.getElementById('drop-zone');
-    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); });
-    dropZone.addEventListener('drop', function(e) { e.preventDefault(); handleImageFile(e.dataTransfer.files[0]); });
-
-    // 總結算核心引擎（依據規範公式計算）
+    // 總結算核心引擎（嚴格遵照總監備忘錄公式）
     document.getElementById('btn-calc').addEventListener('click', function() {
         const select = document.getElementById('factory-select');
         const factoryName = select.options[select.selectedIndex].getAttribute('data-name');
@@ -297,47 +288,48 @@
         const cut = parseFloat(document.getElementById('amt-cut').value) || 0;
         const hasDelay = document.getElementById('chk-delay').checked;
 
-        // 總監公式計算
-        const banShare = Math.round(ban * 0.68);      // 9996 實得 68% [cite: 11, 21]
-        const kaoShare = Math.round(kao * 0.68);      // 9997 實得 68% [cite: 11, 22]
-        const yinShare = Math.round(yin * 1.00);      // 9998 實得 100% [cite: 12, 23]
-        const partsShare = Math.round(parts * 0.80);  // 零件折抵 實得 80% [cite: 13]
+        // 林總監公式計算
+        const banShare = Math.round(ban * 0.68);      // 9996 純工資 68%
+        const kaoShare = Math.round(kao * 0.68);      // 9997 烤漆工資 68%
+        const yinShare = Math.round(yin * 1.00);      // 9998 引電工資 100%
+        const partsShare = Math.round(parts * 0.80);  // 堪用零件折抵 80%
 
         const subtotal工資 = banShare + kaoShare + yinShare + partsShare;
-        const cutPenalty = Math.round(cut * 0.30);   // 砍價我方分攤 30% [cite: 63, 64]
+        const cutPenalty = Math.round(cut * 0.30);    // 我方分攤 30% 砍價
         let currentReal = subtotal工資 - cutPenalty;
 
         let delayPenalty = 0;
-        if (hasDelay) delayPenalty = Math.round(currentReal * 0.15); // 延誤客訴扣 15% [cite: 62]
+        if (hasDelay) delayPenalty = Math.round(currentReal * 0.15); // 交期延誤扣 15%
 
         const finalPay = currentReal - delayPenalty;
 
         document.getElementById('report-zone').style.display = 'block';
         document.getElementById('txt-final-amt').innerText = `$${finalPay.toLocaleString()}`;
 
-        // 格式化輸出完全符合總監 DMS 工單開立規範的格式
+        // 格式化輸出報告
         let details = `【星聯尚鵬 鈑烤對帳請款單】\n`;
         details += `對帳日期：${new Date().toLocaleDateString()}\n`;
         details += `委修來源：${factoryName}\n`;
         details += `虛擬工單車號：${vTicket}\n`;
         details += `-------------------------------------------\n`;
-        details += `依照《星聯尚鵬鈑烤作業規範》開立項目如下：\n\n`;
-        details += `• 項目: 9996 | 說明: ${vTicket} 鈑金工資 [cite: 21]\n`;
-        details += `  (原始累計總額: $${ban.toLocaleString()} ➔ 請款售價 68%): $${banShare.toLocaleString()} 元 [cite: 21]\n\n`;
-        details += `• 項目: 9997 | 說明: ${vTicket} 烤漆工資 [cite: 22]\n`;
-        details += `  (原始累計總額: $${kao.toLocaleString()} ➔ 請款售價 68%): $${kaoShare.toLocaleString()} 元 [cite: 22]\n\n`;
+        details += `依照《林總監流程 ─ 承修廠內部金額核銷規範》開立如下：\n\n`;
+        details += `• 項目: 9996 | 說明: ${vTicket} 鈑金工資\n`;
+        details += `  (原始總額: $${ban.toLocaleString()} ➔ 實拿技術工資 68%): $${banShare.toLocaleString()} 元\n\n`;
+        details += `• 項目: 9997 | 說明: ${vTicket} 烤漆工資\n`;
+        details += `  (原始總額: $${kao.toLocaleString()} ➔ 實拿技術工資 68%): $${kaoShare.toLocaleString()} 元\n\n`;
         if (yin > 0) {
-            details += `• 項目: 9998 | 說明: ${vTicket} 引電工資 [cite: 23]\n`;
-            details += `  (原始累計總額: $${yin.toLocaleString()} ➔ 請款售價 100%): $${yinShare.toLocaleString()} 元 [cite: 23]\n\n`;
+            details += `• 項目: 9998 | 說明: ${vTicket} 引電工資\n`;
+            details += `  (原始總額: $${yin.toLocaleString()} ➔ 實拿技術工資 100%): $${yinShare.toLocaleString()} 元\n\n`;
         }
         if (parts > 0) {
-            details += `• 堪用零件折抵工資收入 (請款售價 80%): $${partsShare.toLocaleString()} 元 [cite: 13]\n\n`;
+            details += `• 堪用零件折抵工資\n`;
+            details += `  (原始轉化總額: $${parts.toLocaleString()} ➔ 實拿轉化工資 80%): $${partsShare.toLocaleString()} 元\n\n`;
         }
         details += `-------------------------------------------\n`;
         details += `【異常扣減分攤】\n`;
-        details += `  • 保險批價總減收: $${cut.toLocaleString()} ➔ 我方分攤 30%: -$${cutPenalty.toLocaleString()} 元 [cite: 63, 64]\n`;
+        details += `  • 保險批價總減收: $${cut.toLocaleString()} ➔ 我方分攤 30%: -$${cutPenalty.toLocaleString()} 元\n`;
         if (hasDelay) {
-            details += `  • 🚨 交期延誤處罰: 扣除此案委修工資 15%: -$${delayPenalty.toLocaleString()} 元 [cite: 62]\n`;
+            details += `  • 🚨 交期延誤處罰: 扣除此案委修工資 15%: -$${delayPenalty.toLocaleString()} 元\n`;
         }
         details += `-------------------------------------------\n`;
         details += `💰 承修廠（內湖）向委修廠最終總請款金額：$${finalPay.toLocaleString()} 元`;
@@ -359,8 +351,6 @@
         document.getElementById('amt-parts').value = '';
         document.getElementById('amt-cut').value = '0';
         document.getElementById('chk-delay').checked = false;
-        document.getElementById('pasted-img').style.display = 'none';
-        document.getElementById('paste-placeholder').style.display = 'block';
         document.getElementById('report-zone').style.display = 'none';
     });
 </script>
